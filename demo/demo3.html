@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<style>
+h1 {text-align: center;}
+</style>
+<body>
+<h1>The "dumb" version</h1>
+<div style = "text-align:center;">
+	<canvas id="myCanvas" width="1440" height="810" style="border:1px solid #c3c3c3;">
+		Your browser does not support the canvas element.
+	</canvas>
+	<div class="container">
+		<button onclick="clickOnMerchant()">Merchant</button> 
+		key binds: <b>J</b> - quests  <b>M</b> - map  <b>I</b> - inventory  <b>P</b> - stats&skills
+	</div>
+</div>
+<script src="ui.js"></script>
+<script>
+
+var ui_windows = [];
+
+function draw(){
+	console.log("--------------- clear -------------");
+	console.log(keys);
+	
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	console.log(ui_windows);
+	ui_windows.forEach(function(fun, index, array){
+		fun();
+	});
+}
+
+function changeWindow(keyName){
+	if(keyName === statsKey || keyName === inventoryKey){
+		changeStatsOrInventory(keyName);
+	}
+	else if (key_to_fun.has(keyName)){
+
+		ui_windows = [];
+		
+		if(keys.has(keyName) && keys.get(keyName)){
+			keys = new Map([[keyName, false]]);
+		}
+		else{
+			keys = new Map([[keyName, true]]);
+			ui_windows.push(key_to_fun.get(keyName));
+			
+			if(keyName === merchantKey){
+				keys.set(inventoryKey, true);
+				ui_windows.push(key_to_fun.get(inventoryKey));
+			}	
+		}
+	}
+}
+
+function changeStatsOrInventory(keyName){
+	var has_stats = keys.has(statsKey) && keys.get(statsKey);
+	var has_inventory = keys.has(inventoryKey) && keys.get(inventoryKey);
+
+	ui_windows = [];
+
+	if(keyName === statsKey){
+		keys = new Map([[statsKey, !has_stats], [inventoryKey, has_inventory]]);
+	}
+	else if(keyName === inventoryKey){
+		keys = new Map([[statsKey, has_stats], [inventoryKey, !has_inventory]]);
+	}
+	keys.forEach(function(value, key, map){
+		if(value) ui_windows.push(key_to_fun.get(key));
+	});
+}
+
+function clickOnMerchant(){
+	console.log("on merchant");
+	ui_windows = [];
+		
+	if(keys.get(merchantKey)){
+		keys = new Map([[merchantKey, false]]);
+	}
+	else{
+		keys = new Map([[merchantKey, true]]);
+		ui_windows.push(key_to_fun.get(merchantKey));
+		keys.set(inventoryKey, true);
+		ui_windows.push(key_to_fun.get(inventoryKey));
+	}
+	draw();
+}
+
+
+</script>
+
+</body>
+</html>

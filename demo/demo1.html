@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<style>
+h1 {text-align: center;}
+</style>
+<body>
+<h1>Separate windows but prioritize merchant UI</h1>
+<div style = "text-align:center;">
+	<canvas id="myCanvas" width="1440" height="810" style="border:1px solid #c3c3c3;">
+		Your browser does not support the canvas element.
+	</canvas>
+	<div class="container">
+		<button onclick="clickOnMerchant()">Merchant</button> 
+		key binds: <b>J</b> - quests  <b>M</b> - map  <b>I</b> - inventory  <b>P</b> - stats&skills
+	</div>
+</div>
+<script src="ui.js"></script>
+<script>
+
+var ui_windows = [];
+
+function draw(){
+	console.log("--------------- clear -------------");
+	console.log("charInventoryId: ", charInventoryId, ", statsId: ", statsId, ", merchantId: ", merchantId, ", questsId: ", questsId);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	console.log(ui_windows);
+	ui_windows.forEach(function(fun, index, array){
+		fun();
+	});
+}
+
+function changeWindow(keyName){
+
+	if(keyName === inventoryKey && keys.has(merchantKey) && keys.get(merchantKey)){
+		changeMerchant();
+	}
+	else if (key_to_fun.has(keyName)){
+	
+		if(keys.has(keyName))
+			keys.set(keyName, !keys.get(keyName));
+		else
+			keys.set(keyName, true);
+		
+		
+		if(keys.get(keyName)){
+		
+			ui_windows.push(key_to_fun.get(keyName));
+		}
+		else{
+			ui_windows.splice(ui_windows.indexOf(key_to_fun.get(keyName)), 1);
+		}
+	}
+}
+
+function changeMerchant(){
+
+	if(keys.has(merchantKey) && keys.get(merchantKey)){
+		keys.set(merchantKey, false);
+		keys.set(inventoryKey, false);
+		ui_windows.splice(ui_windows.indexOf(key_to_fun.get(merchantKey)), 1);
+		ui_windows.splice(ui_windows.indexOf(key_to_fun.get(inventoryKey)), 1);
+	}
+	else {
+		ui_windows = [key_to_fun.get(merchantKey), key_to_fun.get(inventoryKey)];
+		keys = new Map([[merchantKey, true],[inventoryKey, true]]);
+	}
+}
+
+function clickOnMerchant(){	
+	changeMerchant();
+	draw();
+}
+
+
+</script>
+</body>
+</html>
